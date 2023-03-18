@@ -5,6 +5,7 @@
 import numpy as np
 from algs.vis import *
 from constants import *
+from algs.log_each_step import log_each_step
 
 def evolve(points, r_c, r_m, results_path=None, k=None, ax=None):
 
@@ -23,17 +24,16 @@ def evolve(points, r_c, r_m, results_path=None, k=None, ax=None):
     row, col = np.diag_indices_from(L)
     L[row, col] = -1. * np.sum(L, axis=1)
     L = -1 * L  # L再取反后，对角线是正数
-    eigenvalue, featurevector = np.linalg.eig(L)
-    second_smallest_eigenvalue_of_backbone_L = np.sort(eigenvalue)[1]
+
     if results_path is not None and k is not None:
-        np.save(f'{results_path}/L_{k}.npy', L)
-        with open(f'{results_path}/eigenvalue.txt', 'a') as file:
-            file.write(str(k) + "," + str(second_smallest_eigenvalue_of_backbone_L) + "\n")
+        log_each_step(results_path, k, A, L)
+
+
     L = np.mat(L)
     points = np.mat(points)
 
     # (ii)
-    next_points = points + h * L * points
+    next_points = points - h * L * points
     next_points = np.array(next_points)
 
     if ax is not None:

@@ -7,6 +7,9 @@ from algs.convex_minimize import calc_CS
 from algs.calc_cc import calc_cc
 from algs.calc_RN import calc_RN
 from algs.vis import *
+from algs.log_each_step import log_each_step
+from algs.detect_nei import detect_nei
+
 from constants import *
 
 
@@ -23,12 +26,8 @@ def evolve(points, r_c, r_m, results_path=None, k=None, ax=None):
     agent_num = len(points)
 
     # (i) 根据感知半径获取所有邻居
-    A = np.zeros(shape=(agent_num, agent_num), dtype=np.int32)
-    for i in range(agent_num):
-        for j in range(i+1, agent_num):
-            if np.linalg.norm(points[i]-points[j]) <= r_c:
-                A[i, j] = 1
-                A[j, i] = 1
+    A, L = detect_nei(agent_num, points, r_c)
+
     # print("A's cc:", calc_cc(A))
     RN_A = calc_RN(A, points)
     # print("RN's cc:", calc_cc(A))
@@ -103,10 +102,19 @@ def evolve(points, r_c, r_m, results_path=None, k=None, ax=None):
                 next_points[i] = results_tp1.x
             else:
                 next_points[i] = results_tp2.x
+
         except scipy.spatial.qhull.QhullError:
             # 只有一个邻居和自身，构建不了凸包，所以直接用外心算法
             results = calc_CS(np.array([c[0], c[1]]), points, i, RN_A, r_c, r_m)
             next_points[i] = results.x
+
+    # (*) LOG
+    if results_path is not None and k is not None:
+        L = RN_A.copy()
+        row, col = np.diag_indices_from(L)
+        L[row, col] = -1. * np.sum(L, axis=1)
+        L = -1 * L  # L再取反后，对角线是正数
+        log_each_step(results_path, k, A, L)
 
     if ax is not None:
         plot_ax(ax, points, A, node_size=node_size)
@@ -115,4 +123,5 @@ def evolve(points, r_c, r_m, results_path=None, k=None, ax=None):
 
     # 动力学演化
     return next_points, A
+
 

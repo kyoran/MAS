@@ -5,19 +5,36 @@
 import os
 import glob
 import shutil
+import argparse
+
+parser = argparse.ArgumentParser()
 
 print("loading...")
+parser.add_argument('--density_type', default="600", choices=[
+    '200', '400', '600', '800', '1000'
+])
+parser.add_argument('--topology_type', default="001", choices=[
+    "001", "002", "003", "004", "005",
+    "006", "007", "008", "009", "010",
+])
+parser.add_argument('--algorithm_type', default="SDB_DSG", choices=[
+    'SAN',
+    'RSRSP',
+    'Motif',
+    'CA',
+    'RNCHCA',
+    'SDB_DSG',
+    'HSBMAS',
+    'HSBMAS_no_CS',
+])
+parser.add_argument('--CS', default=False, action='store_true') # 是否加约束集CS
+args = parser.parse_args()
 
-density_type = "1000"
-topology_type = "009"
-# algorithm_type = "SAN"
-# algorithm_type = "CA"
-algorithm_type = "HSBMAS"
-# algorithm_type = "RNCA"
-# algorithm_type = "RNCHCA"
-# algorithm_type = "HSBMAS"
-
-print("\talgorithm type:", algorithm_type)
+#!!!
+density_type = args.density_type
+topology_type = args.topology_type
+algorithm_type = args.algorithm_type
+#!!!
 
 
 end_threshold = 1e-2
@@ -41,3 +58,6 @@ else:
     os.mkdir(results_path)
 print("\tlog save path:", results_path)
 
+# 统计数据保存文件
+log_file_path = os.path.join(results_path, "0log.txt")
+log_file = open(log_file_path, "w+")

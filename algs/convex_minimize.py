@@ -28,9 +28,9 @@ def calc_CS(circumcenter, points, i, A, r_c, r_m):
     constraints = []
 
     for j in nei_idx:
-        # cfunc = lambda j: lambda loc=j: r/2 - np.linalg.norm(np.array(loc) - np.array([(xi+points[j,0])/2, (yi+points[j,1])/2]))
+        cfunc = lambda j: lambda loc=j: r_c/2 - np.linalg.norm(np.array(loc) - np.array([(xi+points[j,0])/2, (yi+points[j,1])/2]))
         # 每个邻居的约束
-        cfunc = lambda j: lambda loc=j: r_c*r_c/4 - (loc[0]-(xi+points[j,0])/2)**2 - (loc[1]-(yi+points[j,1])/2)**2
+        # cfunc = lambda j: lambda loc=j: r_c*r_c/4 - (loc[0]-(xi+points[j,0])/2)**2 - (loc[1]-(yi+points[j,1])/2)**2
         cdict = {
             'type': 'ineq',
             'fun': cfunc(j)
@@ -56,11 +56,11 @@ def calc_CS(circumcenter, points, i, A, r_c, r_m):
         {'type': 'ineq', 'fun': lambda loc: (loc[0]-xi)*(xc-loc[0])},
     )
     constraints.append(
-        # 约束4：yi<->yc loc[1]在他们之间
+        # 约束5：yi<->yc loc[1]在他们之间
         {'type': 'ineq', 'fun': lambda loc: (loc[1]-yi)*(yc-loc[1])},
     )
     constraints.append(
-        # 约束5：loc在以i为中心，r_m为半径的圆内
+        # 约束6：loc在以i为中心，r_m为半径的圆内
         {'type': 'ineq', 'fun': lambda loc: r_m - np.linalg.norm((loc[0]-xi)**2 + (loc[1]-yi)**2)},
     )
 
@@ -71,8 +71,10 @@ def calc_CS(circumcenter, points, i, A, r_c, r_m):
         method="SLSQP",
         options={
             # "disp": True,
+            # "maxiter": 20,
             "maxiter": 20,
         },
+        tol=1e-6,
         constraints=constraints,        # constraints默认是≥0的
     )
     return result
@@ -87,7 +89,7 @@ if __name__ == '__main__':
     from matplotlib.patches import Circle
     from smallestenclosingcircle import make_circle
 
-    r = 3
+    r = 4
     agent_num = 5
 
     L = 3
@@ -128,7 +130,7 @@ if __name__ == '__main__':
 
     # circumcenter
     c = make_circle(points[nei_and_i_idx])
-    # c = np.array([-2,-2, 1])
+    c = np.array([-2,-2, 2])
     ax.scatter(c[0], c[1], color="red", label="circumcenter")
     i_nei_circumcenter = Circle(xy = (c[0], c[1]), radius=c[2], color='red', alpha=0.3)
     ax.add_patch(i_nei_circumcenter)

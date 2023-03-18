@@ -12,7 +12,7 @@ from constants import *
 if __name__ == '__main__':
 
     # 初始化
-    plt.rc('font', family='Times New Roman')
+    # plt.rc('font', family='Times New Roman')
     plt.switch_backend('agg')
     fig = plt.figure(figsize=(8, 8))
     ax = plt.subplot(111)
@@ -35,3 +35,6 @@ if __name__ == '__main__':
         else:
             points = next_points
             # plt.pause(0.01)
+
+
+    print("all done.")

@@ -14,7 +14,10 @@ Circumcenter Algorithm: Each agent performs:
 
 from algs.smallestenclosingcircle import make_circle
 from algs.convex_minimize import calc_CS
+from algs.detect_nei import detect_nei
+from algs.log_each_step import log_each_step
 from algs.vis import *
+
 from constants import *
 
 import numpy as np
@@ -26,12 +29,7 @@ def evolve(points, r_c, r_m, results_path=None, k=None, ax=None):
     agent_num = len(points)
 
     # (i) it detects its neighbors according to G;
-    A = np.zeros(shape=(agent_num, agent_num), dtype=np.int32)
-    for i in range(agent_num):
-        for j in range(i+1, agent_num):
-            if np.linalg.norm(points[i]-points[j]) <= r_c:
-                A[i, j] = 1
-                A[j, i] = 1
+    A, L = detect_nei(agent_num, points, r_c)
 
     # (ii) it computes the circumcenter of the point set comprised of its neighbors and of itself;
     # circumcenters = []
@@ -60,12 +58,9 @@ def evolve(points, r_c, r_m, results_path=None, k=None, ax=None):
     row, col = np.diag_indices_from(L)
     L[row, col] = -1. * np.sum(L, axis=1)
     L = -1 * L  # L再取反后，对角线是正数
-    eigenvalue, featurevector = np.linalg.eig(L)
-    second_smallest_eigenvalue_of_backbone_L = np.sort(eigenvalue)[1]
+    # (*) LOG
     if results_path is not None and k is not None:
-        np.save(f'{results_path}/L_{k}.npy', L)
-        with open(f'{results_path}/eigenvalue.txt', 'a') as file:
-            file.write(str(k) + "," + str(second_smallest_eigenvalue_of_backbone_L) + "\n")
+        log_each_step(results_path, k, A, L)
 
 
     if ax is not None:

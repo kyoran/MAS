@@ -1,0 +1,8 @@
+http://snap.stanford.edu/higher-order/code.html
+https://github.com/arbenson/higher-order-organization-matlab
+
+https://github.com/lipzh5/MWLP
+
+https://github.com/EthanVn/MotifX
+
+https://github.com/FraLotito/higher-order-motifs

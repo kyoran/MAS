@@ -6,8 +6,13 @@
 安装库
 """
 # pip install -U pip setuptools
-# pip install matplotlib scipy networkx
+# pip install networkx==2.8.4 matplotlib==3.5.2 scipy==1.9.1
 
+
+"""
+运行的时候就改下constants.py里面的算法名，拓扑名等变量，
+然后用run_evolve.py运行就行了
+"""
 
 """
 会出现没新罗马字体的情况

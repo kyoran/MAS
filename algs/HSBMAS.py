@@ -11,6 +11,8 @@ from algs.timer import *
 from algs.union_find import *
 from algs.convex_minimize import calc_CS
 from algs.vis import vis_HSBMAS
+from algs.log_each_step import log_each_step
+from algs.detect_nei import detect_nei
 from constants import *
 
 def calc_1_2_hop_connectivity_network(agent_num, points, r_c):
@@ -105,6 +107,7 @@ def evolve(points, r_c, r_m, results_path=None, time_k=None, ax=None):
     # (i) 获取1跳和2跳邻居
     sss_time = time.time()
     C = calc_1_2_hop_connectivity_network(agent_num, points, r_c)
+    A, _ = detect_nei(agent_num, points, r_c)
     print(f"\t[Done ({time.time()-sss_time:.3f})s] 获取1跳和2跳邻居信息")
 
     # (ii) TMPO
@@ -406,16 +409,21 @@ def evolve(points, r_c, r_m, results_path=None, time_k=None, ax=None):
 
     print(f"\t[Done ({time.time()-sss_time:.3f})s] purning")
 
-    # v. 求拉普拉斯矩阵
-    sss_time = time.time()
 
-    L = newC.copy()
-    row, col = np.diag_indices_from(L)
-    L[row, col] = -1. * np.sum(L, axis=1)
-    L = -1 * L      # L再取反后，对角线是正数
-    eigenvalue, featurevector = np.linalg.eig(L)
-    second_smallest_eigenvalue_of_backbone_L = np.sort(eigenvalue)[1]
-    print(f"\t[Done ({time.time()-sss_time:.3f})s] 计算拉式矩阵")
+
+    # (*) LOG
+    if results_path is not None and time_k is not None:
+        # v. 求拉普拉斯矩阵
+        sss_time = time.time()
+        L = newC.copy()
+        row, col = np.diag_indices_from(L)
+        L[row, col] = -1. * np.sum(L, axis=1)
+        L = -1 * L      # L再取反后，对角线是正数
+        eigenvalue, featurevector = np.linalg.eig(L)
+        second_smallest_eigenvalue_of_backbone_L = np.sort(eigenvalue)[1]
+        log_each_step(results_path, time_k, newC, L)
+
+        print(f"\t[Done ({time.time()-sss_time:.3f})s] 计算拉式矩阵")
 
     # vi. 计算候选点
     sss_time = time.time()
@@ -467,6 +475,7 @@ def evolve(points, r_c, r_m, results_path=None, time_k=None, ax=None):
         vis_HSBMAS(ax, points, types, newC)
         plt.savefig(os.path.join(results_path, f"{time_k}.png"), dpi=500)
         plt.savefig(os.path.join(results_path, f"{time_k}.svg"))
+
 
 
     print(f"\t[Done ({time.time()-sss_time:.3f})s] 可视化及保存相关过程文件")
